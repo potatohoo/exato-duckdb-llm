@@ -49,7 +49,7 @@ const App = () => {
 
         {queryExecuted && <QueryResults queryResults={queryResults} />}
 
-        <LLMChat llmMessages={llmMessages} setLlmMessages={setLlmMessages} />
+        {/* <LLMChat llmMessages={llmMessages} setLlmMessages={setLlmMessages} /> */}
       </div>
     </div>
   );

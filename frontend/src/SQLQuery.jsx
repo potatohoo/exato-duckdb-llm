@@ -1,29 +1,39 @@
 // SQLQuery.jsx
-import React, { useState } from 'react';
-import { Database, Play } from 'lucide-react';
+import React, { useState } from "react";
+import { Database, Play } from "lucide-react";
+import { runSQLQuery } from "./api/api";
 
 const SQLQuery = ({ setQueryResults, setQueryExecuted }) => {
-  const [sqlQuery, setSqlQuery] = useState('');
+  const [sqlQuery, setSqlQuery] = useState("");
 
-  const executeQuery = () => {
+  const executeQuery = async () => {
     if (!sqlQuery.trim()) return;
 
-    const mockResults = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', department: 'Engineering', salary: 75000 },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com', department: 'Marketing', salary: 68000 },
-      { id: 3, name: 'Bob Johnson', email: 'bob@example.com', department: 'Sales', salary: 72000 },
-      { id: 4, name: 'Alice Brown', email: 'alice@example.com', department: 'HR', salary: 65000 },
-      { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', department: 'Engineering', salary: 80000 }
-    ];
+    try {
+      const res = await runSQLQuery(sqlQuery); // Get CSV blob from backend
 
-    setQueryResults(mockResults);
-    setQueryExecuted(true);
+      const text = await res.data.text(); // Convert blob to string
+      const lines = text.trim().split("\n");
+      const [headerLine, ...rowLines] = lines;
+
+      const headers = headerLine.split(",");
+      const rows = rowLines.map((line) => {
+        const values = line.split(",");
+        return Object.fromEntries(headers.map((h, i) => [h, values[i]]));
+      });
+
+      setQueryResults(rows);
+      setQueryExecuted(true);
+    } catch (err) {
+      console.error("Query failed:", err);
+      alert("Query failed. Check SQL syntax or uploaded data.");
+    }
   };
 
   const clearResults = () => {
     setQueryResults([]);
     setQueryExecuted(false);
-    setSqlQuery('');
+    setSqlQuery("");
   };
 
   return (
@@ -37,7 +47,9 @@ const SQLQuery = ({ setQueryResults, setQueryExecuted }) => {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Write your SQL query</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Write your SQL query
+          </label>
           <textarea
             value={sqlQuery}
             onChange={(e) => setSqlQuery(e.target.value)}

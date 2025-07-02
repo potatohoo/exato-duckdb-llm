@@ -1,47 +1,40 @@
 // LLMChat.jsx
-import React, { useState } from 'react';
-import { MessageSquare, Send, Bot, User } from 'lucide-react';
+import { askLLM } from "./api/api"; //
 
-const LLMChat = ({ llmMessages, setLlmMessages }) => {
-  const [currentMessage, setCurrentMessage] = useState('');
+const LLMChat = async () => {
+  if (!currentMessage.trim()) return;
 
-  const sendMessage = () => {
-    if (!currentMessage.trim()) return;
+  const userMessage = {
+    id: Date.now(),
+    type: "user",
+    content: currentMessage,
+    timestamp: new Date().toLocaleTimeString(),
+  };
 
-    const userMessage = {
-      id: Date.now(),
-      type: 'user',
-      content: currentMessage,
-      timestamp: new Date().toLocaleTimeString()
+  setLlmMessages((prev) => [...prev, userMessage]);
+
+  try {
+    const aiResponse = await askLLM(currentMessage);
+    const aiMessage = {
+      id: Date.now() + 1,
+      type: "ai",
+      content: aiResponse,
+      timestamp: new Date().toLocaleTimeString(),
     };
 
-    setLlmMessages(prev => [...prev, userMessage]);
+    setLlmMessages((prev) => [...prev, aiMessage]);
+  } catch (error) {
+    const errMessage = {
+      id: Date.now() + 2,
+      type: "ai",
+      content: "Something went wrong. Please try again later.",
+      timestamp: new Date().toLocaleTimeString(),
+    };
+    setLlmMessages((prev) => [...prev, errMessage]);
+    console.error("LLM Error:", error);
+  }
 
-    setTimeout(() => {
-      const aiResponses = [
-        "I can help you analyze your data. What specific insights are you looking for?",
-        "Based on your query, I notice some interesting patterns in the dataset.",
-        "That's a great question! Let me break down the results for you.",
-        "I can see the data structure. Would you like me to suggest some queries?",
-        "The uploaded files show interesting trends. What would you like to explore?"
-      ];
-
-      const aiMessage = {
-        id: Date.now() + 1,
-        type: 'ai',
-        content: aiResponses[Math.floor(Math.random() * aiResponses.length)],
-        timestamp: new Date().toLocaleTimeString()
-      };
-
-      setLlmMessages(prev => [...prev, aiMessage]);
-    }, 1000);
-
-    setCurrentMessage('');
-  };
-
-  const clearLLMMessages = () => {
-    setLlmMessages([]);
-  };
+  setCurrentMessage("");
 
   return (
     <div className="bg-white rounded-xl shadow-lg border">
@@ -64,26 +57,54 @@ const LLMChat = ({ llmMessages, setLlmMessages }) => {
         {llmMessages.length === 0 ? (
           <div className="text-center text-gray-500 mt-20">
             <Bot className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-            <p className="text-lg">Start a conversation with the AI assistant</p>
-            <p className="text-sm">Ask questions about your data or get analysis insights</p>
+            <p className="text-lg">
+              Start a conversation with the AI assistant
+            </p>
+            <p className="text-sm">
+              Ask questions about your data or get analysis insights
+            </p>
           </div>
         ) : (
           llmMessages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${
+                message.type === "user" ? "justify-end" : "justify-start"
+              }`}
             >
-              <div className={`flex items-start max-w-3xl ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`p-2 rounded-full ${message.type === 'user' ? 'bg-blue-100 ml-3' : 'bg-purple-100 mr-3'}`}>
-                  {message.type === 'user' ? (
+              <div
+                className={`flex items-start max-w-3xl ${
+                  message.type === "user" ? "flex-row-reverse" : "flex-row"
+                }`}
+              >
+                <div
+                  className={`p-2 rounded-full ${
+                    message.type === "user"
+                      ? "bg-blue-100 ml-3"
+                      : "bg-purple-100 mr-3"
+                  }`}
+                >
+                  {message.type === "user" ? (
                     <User className="h-5 w-5 text-blue-600" />
                   ) : (
                     <Bot className="h-5 w-5 text-purple-600" />
                   )}
                 </div>
-                <div className={`p-4 rounded-lg ${message.type === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
+                <div
+                  className={`p-4 rounded-lg ${
+                    message.type === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-900"
+                  }`}
+                >
                   <p className="mb-1">{message.content}</p>
-                  <p className={`text-xs ${message.type === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>
+                  <p
+                    className={`text-xs ${
+                      message.type === "user"
+                        ? "text-blue-200"
+                        : "text-gray-500"
+                    }`}
+                  >
                     {message.timestamp}
                   </p>
                 </div>
@@ -99,7 +120,7 @@ const LLMChat = ({ llmMessages, setLlmMessages }) => {
             type="text"
             value={currentMessage}
             onChange={(e) => setCurrentMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            onKeyPress={(e) => e.key === "Enter" && sendMessage()}
             placeholder="Ask me anything about your data..."
             className="flex-1 p-4 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />

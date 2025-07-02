@@ -1,41 +1,50 @@
 // LLMChat.jsx
 import { askLLM } from "./api/api"; //
+import React, { useState } from "react";
+import { MessageSquare, Send, Bot, User } from 'lucide-react';
 
-const LLMChat = async () => {
-  if (!currentMessage.trim()) return;
+const LLMChat = ({ llmMessages, setLlmMessages }) => {
+  const [currentMessage, setCurrentMessage] = useState('');
 
-  const userMessage = {
-    id: Date.now(),
-    type: "user",
-    content: currentMessage,
-    timestamp: new Date().toLocaleTimeString(),
+  const sendMessage = async () => {
+    if (!currentMessage.trim()) return;
+
+    const userMessage = {
+      id: Date.now(),
+      type: "user",
+      content: currentMessage,
+      timestamp: new Date().toLocaleTimeString(),
+    };
+
+    setLlmMessages((prev) => [...prev, userMessage]);
+
+    try {
+      const aiAnswer = await askLLM(currentMessage);
+      const aiMessage = {
+        id: Date.now() + 1,
+        type: "ai",
+        content: aiAnswer,
+        timestamp: new Date().toLocaleTimeString(),
+      };
+
+      setLlmMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error("LLM Error:", error);
+      const errMessage = {
+        id: Date.now() + 2,
+        type: "ai",
+        content: "Something went wrong. Please try again later.",
+        timestamp: new Date().toLocaleTimeString(),
+      };
+      setLlmMessages((prev) => [...prev, errMessage]);
+    }
+
+    setCurrentMessage('');
   };
 
-  setLlmMessages((prev) => [...prev, userMessage]);
-
-  try {
-    const aiResponse = await askLLM(currentMessage);
-    const aiMessage = {
-      id: Date.now() + 1,
-      type: "ai",
-      content: aiResponse,
-      timestamp: new Date().toLocaleTimeString(),
-    };
-
-    setLlmMessages((prev) => [...prev, aiMessage]);
-  } catch (error) {
-    const errMessage = {
-      id: Date.now() + 2,
-      type: "ai",
-      content: "Something went wrong. Please try again later.",
-      timestamp: new Date().toLocaleTimeString(),
-    };
-    setLlmMessages((prev) => [...prev, errMessage]);
-    console.error("LLM Error:", error);
-  }
-
-  setCurrentMessage("");
-
+  const clearLLMMessages = () => {
+    setLlmMessages([]);
+  };
   return (
     <div className="bg-white rounded-xl shadow-lg border">
       <div className="flex items-center justify-between p-6 border-b">

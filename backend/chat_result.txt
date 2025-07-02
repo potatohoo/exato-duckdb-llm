@@ -1,0 +1,20 @@
+ This dataset provides information about students, including their unique ID, name, class, mark, and gender. Here's a summary of the data along with some insights:
+
+1. Total number of students: 35
+2. Gender Distribution:
+   - Male: 17 (48.6%)
+   - Female: 18 (51.4%)
+
+3. Class distribution:
+   - Three (3): 8.57%
+   - Four (9): 25.71%
+   - Five (3): 8.57%
+   - Six (6): 17.14%
+   - Seven (6): 17.14%
+   - Eight (1): 2.86%
+   - Nine (2): 5.71%
+
+4. Highest mark: 94 (obtained by student number 12)
+5. Average mark across all students: Approximately 66.34 (calculated as the sum of marks divided by the total number of students)
+6. Female students seem to have a slightly higher average mark compared to male students, but the difference is not significant due to the small sample size.
+7. It appears that there are more female students in the higher classes (Six, Seven, and Eight), while there are more male students in the lower classes (Three and Four). However, this observation should be confirmed with a larger dataset as it could be due to chance or sampling bias.

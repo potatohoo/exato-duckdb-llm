@@ -1,4 +1,11 @@
+# Ignore Python cache and virtual environments
 venv/
 __pycache__/
+*/__pycache__/
+
+# Ignore VSCode settings
 .vscode/
-nodemodules/
+
+# Ignore Node.js modules
+node_modules/
+frontend/node_modules/

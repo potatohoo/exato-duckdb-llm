@@ -3,7 +3,7 @@ import pandas as pd
 import duckdb
 from werkzeug.utils import secure_filename
 from flask import jsonify
-import pdfplumber
+from pdfhandler import extract_pdf_content
 
 con = duckdb.connect()
 df_global = {"df": None}
@@ -26,6 +26,22 @@ def handle_upload(request, upload_folder, con, df_global):
             df = pd.read_json(filepath)
         elif filename.endswith('.parquet'):
             df = pd.read_parquet(filepath)
+        elif filename.endswith('.pdf'):
+            tables, paragraphs = extract_pdf_content(filepath)
+            
+            if tables and not paragraphs:
+                df = pd.concat(tables, ignore_index=True)
+
+            elif paragraphs and not tables:
+                df = pd.DataFrame(paragraphs, columns=['paragraphs'])
+
+            elif tables and paragraphs:
+                df = pd.concat(tables, ignore_index=True)
+                joined_text = "\n\n".join(paragraphs)
+                df['paragraphs'] = joined_text
+
+            else:
+                return jsonify({'error': 'No extractable data in PDF'}), 400
         else:
             return jsonify({'error': 'Unsupported file type'}), 400
 
@@ -39,3 +55,4 @@ def handle_upload(request, upload_folder, con, df_global):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+

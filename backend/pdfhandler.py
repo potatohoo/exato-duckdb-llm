@@ -1,10 +1,10 @@
 import pandas as pd
-import PyMuPDF
+import pymupdf
 import re
 from flask import jsonify
 
 def extract_pdf_content(filepath):
-    doc = fitz.open(filepath)
+    doc = pymupdf.open(filepath)
     tables = []
     paragraphs = []
 
